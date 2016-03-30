@@ -1,0 +1,3 @@
+resource_registry:
+#  OS::TripleO::ControllerExtraConfigPre: cinder-multiple-netapp.yaml
+  OS::TripleO::NodeExtraConfigPost: cinder-multiple-netapp.yaml

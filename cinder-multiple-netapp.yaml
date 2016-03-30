@@ -1,0 +1,47 @@
+heat_template_version: 2014-10-16
+
+description: >
+  Run Puppet extra configuration to set custom backends
+
+parameters:
+  servers:
+    type: json
+
+resources:
+  MyCustomConfig:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      config: {get_file: manifests/cinder-multiple-netapp.pp}  # 1
+      group: puppet
+      options:
+        enable_hiera: True
+        enable_facter: False
+
+  MyCustomDeployments: # 2
+    type: OS::Heat::SoftwareDeployments
+    properties:
+      config: {get_resource: MyCustomConfig}
+      servers: {get_param: servers}
+
+  CinderRestartConfig: # 3
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: {get_file: cinder_restart.sh}
+
+  CinderRestartDeployment: # 4
+    type: OS::Heat::SoftwareDeployments
+    #depends_on: MyCustomDeployments
+    properties:
+      servers:  {get_param: servers}
+      config: {get_resource: CinderRestartConfig}
+      actions: ['CREATE','UPDATE']
+
+outputs:
+  deploy_stdout:
+    description: Deployment reference, used to trigger puppet apply on changes
+    value: 
+      list_join:
+        - ""
+        - - {get_attr: [MyCustomDeployments, deploy_stdout]}
+          - {get_attr: [CinderRestartDeployment, deploy_stdout]}
