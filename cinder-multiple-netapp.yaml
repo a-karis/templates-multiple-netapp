@@ -31,7 +31,7 @@ resources:
 
   CinderRestartDeployment: # 4
     type: OS::Heat::SoftwareDeployments
-    #depends_on: MyCustomDeployments
+    depends_on: MyCustomDeployments
     properties:
       servers:  {get_param: servers}
       config: {get_resource: CinderRestartConfig}
